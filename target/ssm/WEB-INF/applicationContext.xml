@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:beans="http://www.springframework.org/schema/websocket"
+       xmlns:aop="http://www.springframework.org/schema/aop" xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd http://www.springframework.org/schema/websocket http://www.springframework.org/schema/websocket/spring-websocket.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <context:component-scan base-package="com.pym"/>
+
+    <mvc:annotation-driven />
+    <mvc:default-servlet-handler/>
+    <context:annotation-config/>
+
+    <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="locations" value="classpath:db.properties"/>
+    </bean>
+
+    <bean id="datasource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="url" value="${jdbc.url}"/>
+        <property name="username" value="${jdbc.user}"/>
+        <property name="password" value="${jdbc.password}"/>
+    </bean>
+    <!--=====================================配置和mybatis的整合==========================================-->
+    <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="datasource"/>
+    <property name="mapperLocations" value="/mapper/*_mapper.xml" />
+    <property name="configLocation" value="/mapper/mapper_configuration.xml" />
+</bean>
+
+    <bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+        <property name="prefix" value="/" />
+        <property name="suffix" value=".jsp" />
+    </bean>
+    <!--配置扫描器，将mybatis接口的实现加入到IOC容器中-->
+    <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+        <!--扫描所有dao接口的实现，加入到ioc容器中-->
+        <property name="basePackage" value="com.pym.dao"/>
+    </bean>
+
+    <!--=====================================事务控制的配置======================================================-->
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <!--控制住数据源-->
+        <property name="dataSource" ref="datasource"/>
+    </bean>
+    <!--两种方式-->
+    <!--一是开始基于注解的事务，二是使用XML配置形式的事务（比较重要的都是用这个配制式）-->
+    <aop:config>
+        <!--切入点表达式-->
+        <!--* com.baidu.crud.service..*(..)-->
+        <!--返回值类型所有 com.pym.service..这个包下得所有包（..就是包括子包）*（）是包下得所有方法 括号中的..是方法参数任意多也行-->
+        <aop:pointcut id="txPoint" expression="execution(* com.pym.service..*(..))"/>
+        <!--配置事务增强-->
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="txPoint"/>
+    </aop:config>
+    <!--配置事务增强，也就是事务如何具体切入-->
+    <!--transaction-manager="transactionManager"写不写都行，默认是transactionManager，所以48行的id应该为transactionManager-->
+    <tx:advice id="txAdvice" transaction-manager="transactionManager">
+        <tx:attributes>
+            <!--表示所有方法都是事务方法-->
+            <tx:method name="*"/>
+            <!--以get开头的所有方法-->
+            <tx:method name="get*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+</beans>

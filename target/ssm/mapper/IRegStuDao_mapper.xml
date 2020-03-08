@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.pym.dao.IRegStuDao">
+    <resultMap id="StudentMap" type="Student">
+        <id column="id" property="id" jdbcType="VARCHAR"/>
+        <result column="pwd" property="pwd" jdbcType="VARCHAR"/>
+        <result column="name" property="name" jdbcType="VARCHAR"/>
+        <result column="sex" property="sex" jdbcType="VARCHAR"/>
+        <result column="year" property="year" jdbcType="VARCHAR"/>
+        <result column="major" property="major" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="MajorMap" type="Major">
+        <id column="mid" property="mid" jdbcType="INTEGER"/>
+        <result column="mname" property="mname" jdbcType="VARCHAR"/>
+    </resultMap>
+    <resultMap id="AcaMap" type="Academy">
+        <id column="aid" property="aid" jdbcType="VARCHAR"/>
+        <result column="aname" property="aname" jdbcType="VARCHAR"/>
+    </resultMap>
+    <insert id="regStudent" parameterType="com.pym.entity.Student">
+        INSERT INTO student (id,pwd,name,sex,year,major)
+        VALUES (#{id,jdbcType=VARCHAR},#{pwd,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},
+        #{sex,jdbcType=VARCHAR},#{year,jdbcType=VARCHAR},#{major,jdbcType=VARCHAR})
+    </insert>
+    <select id="checkId" parameterType="java.lang.Integer" resultType="java.lang.Long">
+        SELECT COUNT(*) FROM student where id = #{id};
+    </select>
+    <select id="getAllMaj" resultMap="MajorMap">
+        select * from maj_info
+    </select>
+
+    <select id="getAllAca" resultMap="AcaMap">
+        select * from aca_info
+    </select>
+
+</mapper>
