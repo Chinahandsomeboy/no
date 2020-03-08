@@ -188,7 +188,7 @@
         <dependency>
             <groupId>com.alibaba</groupId>
             <artifactId>fastjson</artifactId>
-            <version>1.1.37</version>
+            <version>1.2.25</version>
         </dependency>
 
         <!--用@ResponseBody，需要用到的包，返回json字符串-->
